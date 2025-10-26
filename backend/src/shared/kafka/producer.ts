@@ -1,6 +1,9 @@
 import { Kafka } from "kafkajs";
 import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
+
+const envPath = path.resolve(process.cwd(), ".env");
+dotenv.config({ path: envPath });
 
 const kafka = new Kafka({
   clientId: process.env.KAFKA_CLIENT_ID,

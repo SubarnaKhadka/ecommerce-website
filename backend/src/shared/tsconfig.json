@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "../../dist/shared",
+    "composite": true,
+    "declaration": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": "../"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}
