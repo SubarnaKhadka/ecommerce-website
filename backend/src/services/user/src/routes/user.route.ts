@@ -1,14 +1,9 @@
 import { Router } from "express";
+import { loginUser, registerUser } from "../controllers/user.controller";
 
 const router = Router();
 
-router.get("/", async (_req, res) => {
-  try {
-    res.json({ message: "hello users" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 
 export default router;

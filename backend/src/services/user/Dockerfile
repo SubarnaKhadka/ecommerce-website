@@ -1,9 +1,17 @@
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install --only=prod
-COPY . .
-WORKDIR /app/src/services/user
-RUN npm install --only=dev
+FROM node:20-alpine
 
-CMD ["npx", "ts-node", "-r", "tsconfig-paths/register", "src/index.ts"]
+WORKDIR /app
+
+# Copy root and service files
+COPY package*.json ./tsconfig.base.json ./
+COPY src/shared ./src/shared
+COPY src/services/user ./src/services/user
+
+# Install dependencies (resolves all workspaces)
+RUN npm install
+
+WORKDIR /app/src/services/user
+RUN npm run build
+
+EXPOSE 3004
+CMD ["node", "dist/index.js"]

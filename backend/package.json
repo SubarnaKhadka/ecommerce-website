@@ -1,0 +1,27 @@
+{
+  "name": "ecommerce-website",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "src/shared",
+    "src/services/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "npm-run-all": "^4.1.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "setup:kafka": "ts-node src/shared/src/kafka/admin.ts",
+    "build": "tsc -b",
+    "setup": "npm run setup:kafka",
+    "build:shared": "npm --workspace src/shared run build",
+    "dev:api-gateway": "npm --workspace src/services/api-gateway run dev",
+    "dev:order": "npm --workspace src/services/order run dev",
+    "dev:payment": "npm --workspace src/services/payment run dev",
+    "dev:product": "npm --workspace src/services/product run dev",
+    "dev:user": "npm --workspace src/services/user run dev",
+    "dev": "npm run setup && npm run build:shared && npm-run-all --parallel dev:order dev:payment dev:product dev:user dev:api-gateway"
+  }
+}

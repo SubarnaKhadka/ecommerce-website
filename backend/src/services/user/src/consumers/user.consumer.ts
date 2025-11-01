@@ -1,12 +1,12 @@
-import { connectMongo, mongoDb } from "../../../../shared/database/mongo";
-import { startConsumer } from "../../../../shared/kafka/consumer";
+import { connectMongo, mongoDb } from "shared";
+import { startConsumer } from "shared";
 
 export async function runUserConsumer() {
   await connectMongo();
 
   await startConsumer(
     process.env.USER_CONSUMER_GROUP!,
-    "user-created",
+    process.env.USER_TOPIC!,
     async ({ message }) => {
       if (!message.value) return;
       const user = JSON.parse(message.value.toString());

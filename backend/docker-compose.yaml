@@ -1,0 +1,91 @@
+version: "3.9"
+
+services:
+  # Kafka (KRaft mode, no Zookeeper)
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-ecommerce
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_CLUSTER_ID: c2f6e8a3-3d6b-4f5b-8d41-0a2f7e5a6b12
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./src/services/api-gateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - user-service
+      - order-service
+      - product-service
+      - payment-service
+
+  # Order service
+  order-service:
+    build:
+      context: .
+      dockerfile: ./src/services/order/Dockerfile
+    restart: unless-stopped
+    container_name: order-service
+    env_file:
+      - ./.env
+    ports:
+      - "3001:3001"
+    depends_on:
+      - kafka
+
+  # Payment service
+  payment-service:
+    build:
+      context: .
+      dockerfile: ./src/services/payment/Dockerfile
+    container_name: payment-service
+    restart: unless-stopped
+    env_file:
+      - ./.env
+
+    ports:
+      - "3002:3002"
+
+  # Product service
+  product-service:
+    build:
+      context: .
+      dockerfile: ./src/services/product/Dockerfile
+    container_name: product-service
+    restart: unless-stopped
+    env_file:
+      - ./.env
+
+    ports:
+      - "3003:3003"
+
+  # User service
+  user-service:
+    build:
+      context: .
+      dockerfile: ./src/services/user/Dockerfile
+    container_name: user-service
+    restart: unless-stopped
+    env_file:
+      - ./.env
+
+    ports:
+      - "3004:3004"

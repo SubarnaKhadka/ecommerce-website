@@ -1,11 +1,11 @@
 import { connectMongo, mongoDb, startConsumer } from "shared";
 
-export async function runOrderConsumer() {
+export async function runPaymentConsumer() {
   await connectMongo();
 
   await startConsumer(
-    process.env.ORDER_CONSUMER_GROUP!,
-    process.env.ORDER_TOPIC!,
+    process.env.PAYMENT_CONSUMER_GROUP!,
+    process.env.PAYMENT_TOPIC!,
     async ({ message }) => {
       if (!message.value) return;
       const order = JSON.parse(message.value.toString());

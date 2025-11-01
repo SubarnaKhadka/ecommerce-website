@@ -1,8 +1,17 @@
-FROM node:18-alpine
+FROM node:20-alpine
+
 WORKDIR /app
-COPY package*.json ./
-RUN npm install --only=prod
-COPY . .
+
+# Copy root and service files
+COPY package*.json ./tsconfig.base.json ./
+COPY src/shared ./src/shared
+COPY src/services/payment ./src/services/payment
+
+# Install dependencies (resolves all workspaces)
+RUN npm install
+
 WORKDIR /app/src/services/payment
-RUN npm install --only=dev
-CMD ["npx", "ts-node", "-r", "tsconfig-paths/register", "src/index.ts"]
+RUN npm run build
+
+EXPOSE 3002
+CMD ["node", "dist/index.js"]

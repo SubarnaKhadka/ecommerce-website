@@ -1,19 +1,16 @@
 import express, { Router } from "express";
 import userRoutes from "./routes/user.route";
-import { connectProducer } from "../../../shared/kafka/producer";
+import { connectProducer } from "shared";
 import { runUserConsumer } from "./consumers/user.consumer";
 
 const app = express();
 app.use(express.json());
 
-const router = Router();
-router.use("/users", userRoutes);
+app.use("/", userRoutes);
 
 const PORT = 3004;
 app.listen(PORT, async () => {
   await connectProducer();
   runUserConsumer();
-  console.log(`🚀 Product service running on port ${PORT}`);
+  console.log(`🚀 User service running on port ${PORT}`);
 });
-
-export default router;
