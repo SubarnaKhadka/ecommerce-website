@@ -60,9 +60,10 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env
-
     ports:
       - "3002:3002"
+    depends_on:
+      - kafka
 
   # Product service
   product-service:
@@ -73,9 +74,10 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env
-
     ports:
       - "3003:3003"
+    depends_on:
+      - kafka
 
   # User service
   user-service:
@@ -86,6 +88,7 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env
-
     ports:
       - "3004:3004"
+    depends_on:
+      - kafka
