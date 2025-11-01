@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 import path from "path";
 
 // load root env
-const envPath = path.resolve(__dirname, "../../../../.env");
+const envPath = path.resolve(__dirname, "../../../../.env.local");
 dotenv.config({ path: envPath });
 
 const app = express();
