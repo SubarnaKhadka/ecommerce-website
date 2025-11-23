@@ -22,6 +22,10 @@
     "dev:payment": "npm --workspace src/services/payment run dev",
     "dev:product": "npm --workspace src/services/product run dev",
     "dev:user": "npm --workspace src/services/user run dev",
-    "dev": "npm run setup && npm run build:shared && npm-run-all --parallel dev:order dev:payment dev:product dev:user dev:api-gateway"
+    "dev:email": "npm --workspace src/services/email run dev",
+    "dev": "npm run setup && npm run build:shared && npm-run-all --parallel dev:order dev:payment dev:product dev:user dev:email dev:api-gateway",
+    "migration:create": "ts-node scripts/migrations/create-migration.ts",
+    "migration:run": "ts-node scripts/migrations/migrate.ts",
+    "migration:revert": "ts-node scripts/migrations/revert.ts"
   }
 }

@@ -1,8 +1,10 @@
 import { MongoClient } from "mongodb";
-import "../load-env";
+import { config } from "../config";
 
-const client = new MongoClient(process.env.MONGO_URI!);
-export const mongoDb = client.db(process.env.MONGO_DB_NAME!);
+const { mongo_uri, mongo_db_name } = config.database;
+
+const client = new MongoClient(mongo_uri);
+export const mongoDb = client.db(mongo_db_name);
 
 export async function connectMongo() {
   await client.connect();

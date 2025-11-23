@@ -4,10 +4,14 @@
     "rootDir": "src",
     "outDir": "dist",
     "composite": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "strict": true,
+    "emitDecoratorMetadata": true,
     "paths": {
       "shared": ["../../shared/src"]
     }
   },
   "references": [{ "path": "../../shared" }],
-  "include": ["src"]
+  "include": ["src", "../../shared/src/types/express/request.d.ts"]
 }

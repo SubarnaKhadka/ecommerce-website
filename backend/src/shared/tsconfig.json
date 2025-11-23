@@ -4,6 +4,10 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strict": true,
     "declarationMap": true,
     "composite": true,
     "esModuleInterop": true

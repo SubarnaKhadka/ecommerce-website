@@ -1,10 +1,18 @@
 import { Pool } from "pg";
-import "../load-env";
+import { config } from "../config";
+
+const {
+  db_host: host,
+  db_port: port,
+  db_user: user,
+  db_password: password,
+  db_name: database,
+} = config.database;
 
 export const pgPool = new Pool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host,
+  port,
+  user,
+  password,
+  database,
 });

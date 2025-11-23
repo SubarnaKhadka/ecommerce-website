@@ -1,7 +1,17 @@
-import { Kafka } from "kafkajs";
-import "../load-env";
+import { Kafka, logLevel } from "kafkajs";
+import { config } from "../config";
 
-export const kafka = new Kafka({
-  clientId: process.env.KAFKA_CLIENT_ID,
-  brokers: process.env.KAFKA_BROKERS!.split(","),
-});
+let kafkaClientInstance: Kafka | null = null;
+
+const { kafka_brokers } = config.kafka;
+
+export function getKafkaClient(clientId: string): Kafka {
+  if (!kafkaClientInstance) {
+    kafkaClientInstance = new Kafka({
+      clientId: clientId,
+      brokers: kafka_brokers.split(","),
+      logLevel: logLevel.ERROR,
+    });
+  }
+  return kafkaClientInstance;
+}

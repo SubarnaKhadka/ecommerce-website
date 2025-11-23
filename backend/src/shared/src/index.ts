@@ -1,9 +1,13 @@
-// database
-export * from "./database/mongo";
-export * from "./database/postgres";
+import "reflect-metadata";
 
-// kafka
-export * from "./kafka/consumer";
-export * from "./kafka/producer";
+export * from "./database";
+export * from "./kafka";
+export * from "./redis";
+export * from "./sentry";
+export * from "./elasticsearch";
 
-// types
+export * from "./auth";
+export * from "./lib";
+export * from "./dtos";
+export * from "./config";
+export * from "./types";

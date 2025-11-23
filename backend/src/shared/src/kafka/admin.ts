@@ -1,10 +1,27 @@
-import { kafka } from "./client";
+import { Kafka } from "kafkajs";
+import { config } from "../config";
+
+const {
+  order_topic,
+  payment_topic,
+  product_topic,
+  user_topic,
+  email_topic,
+  kafka_client_id,
+  kafka_brokers,
+} = config.kafka;
+
+const kafka = new Kafka({
+  clientId: kafka_client_id,
+  brokers: kafka_brokers?.split(","),
+});
 
 export const TOPICS = {
-  orders: process.env.ORDER_TOPIC!,
-  payments: process.env.PAYMENT_TOPIC!,
-  products: process.env.PRODUCT_TOPIC!,
-  users: process.env.USER_TOPIC!,
+  orders: order_topic,
+  payments: payment_topic,
+  products: product_topic,
+  users: user_topic,
+  emails: email_topic,
 };
 
 export async function createTopics() {

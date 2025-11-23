@@ -5,6 +5,9 @@ WORKDIR /app
 # Copy root files (for base tsconfig + dependencies)
 COPY package*.json tsconfig.base.json ./
 
+# Copy shared needed for the service 
+COPY src/shared  ./src/shared 
+
 # Copy everything needed for the service
 COPY src/services/api-gateway ./src/services/api-gateway
 

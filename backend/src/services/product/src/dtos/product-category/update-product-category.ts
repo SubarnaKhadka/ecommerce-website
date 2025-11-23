@@ -1,0 +1,6 @@
+import { PartialType } from "shared";
+import { CreateProductCategoryDto } from "./create-product-category.dto";
+
+export class UpdateProductCategoryDto extends PartialType(
+  CreateProductCategoryDto
+) {}

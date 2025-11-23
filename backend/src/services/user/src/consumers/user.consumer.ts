@@ -1,19 +1,24 @@
-import { connectMongo, mongoDb } from "shared";
-import { startConsumer } from "shared";
+import { connectMongo, mongoDb, startConsumer } from "shared";
+import { UserEvent } from "../enums/user-event.enum";
+import { USER_CONSUMER_GROUP, USER_TOPIC } from "../constants/user.constant";
 
-export async function runUserConsumer() {
+export async function runUserConsumer(clientId: string) {
   await connectMongo();
 
   await startConsumer(
-    process.env.USER_CONSUMER_GROUP!,
-    process.env.USER_TOPIC!,
+    clientId,
+    USER_CONSUMER_GROUP,
+    USER_TOPIC,
     async ({ message }) => {
       if (!message.value) return;
-      const user = JSON.parse(message.value.toString());
+      const event = JSON.parse(message.value.toString());
 
-      await mongoDb
-        .collection("users")
-        .updateOne({ id: user.id }, { $set: user }, { upsert: true });
+      switch (event.type) {
+        case UserEvent.USER_FAILED_LOGIN: {
+          await mongoDb.collection("failed_logins").insertOne(event.data);
+          break;
+        }
+      }
     }
   );
 }

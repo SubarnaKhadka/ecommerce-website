@@ -1,11 +1,13 @@
 import { EachMessagePayload } from "kafkajs";
-import { kafka } from "./client";
+import { getKafkaClient } from "./client";
 
 export async function startConsumer(
+  clientId: string,
   groupId: string,
   topic: string,
   eachMessageHandler: (payload: EachMessagePayload) => Promise<void>
 ) {
+  const kafka = getKafkaClient(clientId);
   const consumer = kafka.consumer({ groupId });
 
   await consumer.connect();
@@ -20,6 +22,5 @@ export async function startConsumer(
       }
     },
   });
-
   console.log(`✅ Kafka consumer running for topic: ${topic}`);
 }

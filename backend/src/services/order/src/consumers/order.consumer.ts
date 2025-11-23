@@ -1,11 +1,13 @@
 import { connectMongo, mongoDb, startConsumer } from "shared";
+import { ORDER_CONSUMER_GROUP, ORDER_TOPIC } from "../constants";
 
-export async function runOrderConsumer() {
+export async function runOrderConsumer(clientId: string) {
   await connectMongo();
 
   await startConsumer(
-    process.env.ORDER_CONSUMER_GROUP!,
-    process.env.ORDER_TOPIC!,
+    clientId,
+    ORDER_CONSUMER_GROUP,
+    ORDER_TOPIC,
     async ({ message }) => {
       if (!message.value) return;
       const order = JSON.parse(message.value.toString());

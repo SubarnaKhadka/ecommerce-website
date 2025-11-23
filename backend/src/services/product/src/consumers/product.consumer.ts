@@ -1,19 +1,49 @@
-import { connectMongo, mongoDb } from "shared";
-import { startConsumer } from "shared";
+import {
+  startConsumer,
+  indexDoc,
+  indexBulkDoc,
+  deleteDocFromIndex,
+} from "shared";
+import {
+  PRODUCT_CONSUMER_GROUP,
+  PRODUCT_INDEX,
+  PRODUCT_TOPIC,
+} from "../constants";
+import * as syncElasticProductService from "../services/sync-product.service";
+import { PRODUCT_EVENT } from "../enums/product-event.enum";
 
-export async function runProductConsumer() {
-  await connectMongo();
-
+export async function runProductConsumer(clientId: string) {
   await startConsumer(
-    process.env.PRODUCT_CONSUMER_GROUP!,
-    process.env.PRODUCT_TOPIC!,
+    clientId,
+    PRODUCT_CONSUMER_GROUP,
+    PRODUCT_TOPIC,
     async ({ message }) => {
       if (!message.value) return;
-      const product = JSON.parse(message.value.toString());
+      const event = JSON.parse(message.value.toString());
 
-      await mongoDb
-        .collection("products")
-        .updateOne({ id: product.id }, { $set: product }, { upsert: true });
+      switch (event.type) {
+        case PRODUCT_EVENT.SYNC_ELASTIC_PRODUCTS_INSERT: {
+          await indexDoc(PRODUCT_INDEX, event.data);
+          break;
+        }
+
+        case PRODUCT_EVENT.SYNC_ELASTIC_BULK_PRODUCTS_INSERT: {
+          console.log(JSON.stringify(event.data), ".....");
+          await indexBulkDoc(PRODUCT_INDEX, event.data);
+          break;
+        }
+
+        case PRODUCT_EVENT.SYNC_ELASTIC_PRODUCTS_UPDATE: {
+          await syncElasticProductService.syncElasticProductUpdate(
+            event.data.id
+          );
+          break;
+        }
+
+        case PRODUCT_EVENT.SYNC_ELASTIC_PRODUCTS_DELETE: {
+          await deleteDocFromIndex(PRODUCT_INDEX, event.data.id);
+        }
+      }
     }
   );
 }
