@@ -10,4 +10,5 @@ export const {
 } = config.kafka;
 
 export const PRODUCT_INDEX = "products";
+
 export const PRODUCT_CLIENT_ID = "product-service";

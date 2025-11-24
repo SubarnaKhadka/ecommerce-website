@@ -39,8 +39,8 @@ export class CreateProductItemDto {
   @IsString()
   product_image?: string;
 
+  @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => CreateProductConfigurationDto)
   configuration: CreateProductConfigurationDto[];

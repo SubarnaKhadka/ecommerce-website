@@ -1,4 +1,4 @@
-import { esClient, indexBulkDoc, Sentry } from "shared";
+import { esClient, indexDoc, Sentry } from "shared";
 
 /*
  * Syncing Database with Elastic Search for now is by throwing event
@@ -20,27 +20,32 @@ export async function createIndex() {
         index: PRODUCT_INDEX,
         mappings: {
           properties: {
-            price: { type: "float" },
-            stock: { type: "integer" },
-            sku: { type: "keyword" },
-            product: {
+            id: { type: "keyword" },
+            name: { type: "text" },
+            description: { type: "text" },
+            product_image: { type: "keyword" },
+            category: {
               properties: {
-                name: { type: "text" },
-                slug: {
-                  type: "keyword",
-                  fields: {
-                    text: { type: "text", analyzer: "standard" },
-                  },
-                },
-                description: { type: "text" },
-                category: { type: "keyword" },
+                id: { type: "keyword" },
+                category_name: { type: "text" },
               },
             },
-            configuration: {
+            items: {
               type: "nested",
               properties: {
-                id: { type: "integer" },
-                value: { type: "keyword" },
+                id: { type: "keyword" },
+                sku: { type: "keyword" },
+                price: { type: "float" },
+                qty_in_stock: { type: "integer" },
+                product_image: { type: "keyword" },
+                configuration: {
+                  type: "nested",
+                  properties: {
+                    id: { type: "integer" },
+                    value: { type: "keyword" },
+                    variation_id: { type: "integer" },
+                  },
+                },
               },
             },
           },
@@ -53,34 +58,12 @@ export async function createIndex() {
   }
 }
 
+export async function syncElasticProductCreate(productId: number) {
+  const esProductDoc = await productService.getProductById(productId);
+  await indexDoc(PRODUCT_INDEX, esProductDoc);
+}
+
 export async function syncElasticProductUpdate(productId: number) {
-  const esProductDoc = [];
-
-  const products = await productService.getProductById(productId);
-  console.log();
-  const { name, slug, items, category, description } = products;
-
-  for (const item of items ?? []) {
-    const esConfiguration = [];
-    for (const config of item?.configuration ?? []) {
-      esConfiguration.push({
-        id: config.id,
-        value: config.value,
-      });
-    }
-    esProductDoc.push({
-      id: item.id,
-      sku: item.sku,
-      price: Number(item.price),
-      stock: item.qty_in_stock,
-      product: {
-        name: name,
-        slug: slug,
-        description: description,
-        category: category?.category_name,
-      },
-      configuration: esConfiguration,
-    });
-  }
-  await indexBulkDoc(PRODUCT_INDEX, esProductDoc);
+  const esProductDoc = await productService.getProductById(productId);
+  await indexDoc(PRODUCT_INDEX, esProductDoc);
 }

@@ -9,14 +9,18 @@ import {
   PaginateDto,
 } from "shared";
 import {
+  autoCompleteSearchProductsHandler,
   createProductHandler,
   deleteProductHandler,
   getAllProductsHandler,
   getProductByIdHandler,
-  searchproductsHandler,
+  listProductsHandler,
   updateProductHandler,
 } from "../controllers/product.controller";
-import { SearchProductDto } from "../dtos/product/search-product.dto";
+import {
+  AutoCompleteSearchDto,
+  SearchProductDto,
+} from "../dtos/product/search-product.dto";
 import { CreateProductDto } from "../dtos/product/create-product.dto";
 import { UpdateProductDto } from "../dtos/product/update-product.dto";
 
@@ -24,12 +28,20 @@ const router = Router();
 
 router.get(
   "/search",
+  validator(AutoCompleteSearchDto, ValidationSource.QUERY),
+  autoCompleteSearchProductsHandler
+);
+
+router.get(
+  "/all",
   validator(SearchProductDto, ValidationSource.QUERY),
-  searchproductsHandler
+  listProductsHandler
 );
 
 router.get(
   "/list",
+  requireAuth,
+  roleGuard("admin"),
   validator(PaginateDto, ValidationSource.QUERY),
   getAllProductsHandler
 );

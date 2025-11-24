@@ -21,3 +21,9 @@ export class SearchProductDto extends PaginateDto {
   @IsNumber()
   maxPrice?: number;
 }
+
+export class AutoCompleteSearchDto {
+  @IsOptional()
+  @IsString()
+  q?: string;
+}

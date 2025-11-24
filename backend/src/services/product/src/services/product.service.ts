@@ -100,7 +100,6 @@ export async function createProduct({
       { client }
     );
 
-    const esDoc = [];
     for (const item of items ?? []) {
       const existingSku = await productModel.getProductItemBySku(item.sku, {
         client,
@@ -120,7 +119,6 @@ export async function createProduct({
         { client }
       );
 
-      const esConfiguration = [];
       for (const config of item.configuration ?? []) {
         const variationOptionId = config.variation_option_id;
 
@@ -133,36 +131,20 @@ export async function createProduct({
           throw new BadRequestException("Variation option not found");
         }
 
-        esConfiguration.push({
-          id: existingVariationOption.id,
-          value: existingVariationOption.value,
-        });
-
         await productModel.createProductConfiguration(
           createdProductItem?.id,
           variationOptionId,
           { client }
         );
       }
-      esDoc.push({
-        id: createdProductItem.id,
-        sku: item.sku,
-        price: Number(item.price),
-        stock: item.qty_in_stock,
-        product: {
-          name: createdProduct.name,
-          slug: createdProduct.slug,
-          description: createdProduct.description,
-          category: existingCategory.category_name,
-        },
-        configuration: esConfiguration,
-      });
     }
     await client.query("COMMIT");
 
     emitEvent(PRODUCT_TOPIC, {
-      type: PRODUCT_EVENT.SYNC_ELASTIC_BULK_PRODUCTS_INSERT,
-      data: esDoc,
+      type: PRODUCT_EVENT.SYNC_ELASTIC_PRODUCTS_INSERT,
+      data: {
+        id: createdProduct.id,
+      },
     });
 
     return { id: createdProduct.id };
@@ -341,10 +323,60 @@ export async function updateProduct({
   }
 }
 
-export async function searchProducts({
+export async function searchAutocomplete(query: string) {
+  if (!query) return [];
+
+  const result = await esClient.search({
+    index: PRODUCT_INDEX,
+    size: 10,
+    query: {
+      multi_match: {
+        query,
+        type: "bool_prefix",
+        fields: ["name^3", "description", "category.category_name"],
+        fuzziness: "AUTO",
+      },
+    },
+    _source: [
+      "id",
+      "name",
+      "description",
+      "product_image",
+      "category",
+      "items.id",
+      "items.price",
+      "items.sku",
+      "items.qty_in_stock",
+    ],
+  });
+
+  return result.hits.hits.map((hit: any) => {
+    const source = hit._source;
+    const minPrice =
+      source.items?.length > 0
+        ? Math.min(...source.items.map((item: any) => item.price))
+        : undefined;
+
+    return {
+      id: source.id,
+      name: source.name,
+      slug: source.slug,
+      image: source.product_image,
+      category: source.category,
+      price: minPrice,
+      stock:
+        source.items?.reduce(
+          (sum: number, i: any) => sum + i.qty_in_stock,
+          0
+        ) ?? 0,
+      sku: source.items?.[0]?.sku,
+    };
+  });
+}
+
+export async function listProducts({
   q,
-  slug,
-  category,
+  categoryId,
   minPrice,
   maxPrice,
   page,
@@ -353,8 +385,7 @@ export async function searchProducts({
   variationOptionValue,
 }: {
   q?: string;
-  slug?: string;
-  category?: string;
+  categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
   page: number;
@@ -369,52 +400,60 @@ export async function searchProducts({
     must.push({
       multi_match: {
         query: q,
-        fields: ["product.name^2", "product.description"],
+        fields: ["name^2", "description"],
         fuzziness: "AUTO",
       },
     });
   }
 
-  if (category) {
+  if (categoryId) {
     filter.push({
-      term: { "product.category": category },
+      term: { "category.id": categoryId },
     });
   }
 
   if (minPrice !== undefined || maxPrice !== undefined) {
     filter.push({
-      range: {
-        price: {
-          gte: minPrice ?? 0,
-          lte: maxPrice ?? Number.MAX_SAFE_INTEGER,
+      nested: {
+        path: "items",
+        query: {
+          range: {
+            "items.price": {
+              gte: minPrice ?? 0,
+              lte: maxPrice ?? Number.MAX_SAFE_INTEGER,
+            },
+          },
         },
       },
     });
   }
 
-  if (slug) {
-    must.push({
-      match: { "slug.text": slug },
-    });
-  }
-
-  if (variationOptionId) {
+  if (variationOptionId || variationOptionValue) {
     filter.push({
       nested: {
-        path: "configuration",
+        path: "items",
         query: {
-          term: { "configurations.id": variationOptionId },
-        },
-      },
-    });
-  }
-
-  if (variationOptionValue) {
-    filter.push({
-      nested: {
-        path: "configuration",
-        query: {
-          term: { "configuration.value": variationOptionValue },
+          nested: {
+            path: "items.configuration",
+            query: {
+              bool: {
+                must: [
+                  variationOptionId
+                    ? {
+                        term: { "items.configuration.id": variationOptionId },
+                      }
+                    : null,
+                  variationOptionValue
+                    ? {
+                        term: {
+                          "items.configuration.value": variationOptionValue,
+                        },
+                      }
+                    : null,
+                ].filter(Boolean),
+              },
+            },
+          },
         },
       },
     });
@@ -434,16 +473,31 @@ export async function searchProducts({
     },
   });
 
-  const hits = result.hits.hits.map((h) => ({
-    id: h._id,
-    ...(h._source as Record<string, any>),
-  }));
+  const hits = result.hits.hits.map((h) => {
+    const source = h._source as any;
+
+    const minPrice =
+      source.items?.length > 0
+        ? Math.min(...source.items.map((item: any) => item.price))
+        : undefined;
+
+    return {
+      id: source.id,
+      name: source.name,
+      description: source.description,
+      category: source.category,
+      slug: source.slug,
+      price: minPrice,
+      image: source.product_image,
+      items: source.items,
+    };
+  });
 
   const total = (result.hits.total as { value: number }).value;
   const totalPage = Math.ceil(total / limit);
 
   return {
-    data: hits as IPaginationResult<IProduct>["data"],
+    data: hits as any,
     pagination: {
       total,
       page,

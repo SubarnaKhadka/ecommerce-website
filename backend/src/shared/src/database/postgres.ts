@@ -15,4 +15,5 @@ export const pgPool = new Pool({
   user,
   password,
   database,
+  max: 20,
 });

@@ -25,6 +25,7 @@ app.use(catchHttpException);
 
 const PORT = 3004;
 app.listen(PORT, async () => {
+  console.log(`hello`);
   await connectProducer(USER_CLIENT_ID);
   runUserConsumer(USER_CLIENT_ID);
   console.log(`🚀 User service running on port ${PORT}`);

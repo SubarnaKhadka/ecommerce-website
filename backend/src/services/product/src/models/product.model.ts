@@ -12,8 +12,7 @@ export async function createProduct(
     client?: PoolClient;
   }
 ) {
-  const query =
-    "INSERT INTO product(category_id,name,description,product_image,slug) VALUES($1,$2,$3,$4,$5) RETURNING *";
+  const query = `INSERT INTO product(category_id,name,description,product_image,slug) VALUES($1,$2,$3,$4,$5) RETURNING *`;
   const results = await queryDb(
     query,
     [categoryId, name, description, image, slug],
@@ -149,8 +148,7 @@ export async function getProductById(
     client: PoolClient;
   }
 ) {
-  const query = `
-  SELECT id, category_id, name, description, product_image FROM product WHERE id = $1`;
+  const query = `SELECT id, category_id, name, description, product_image FROM product WHERE id = $1`;
 
   const results = await queryDb(query, [id], options);
   const row = results?.rows[0];

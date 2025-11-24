@@ -1,9 +1,4 @@
-import {
-  startConsumer,
-  indexDoc,
-  indexBulkDoc,
-  deleteDocFromIndex,
-} from "shared";
+import { startConsumer, indexBulkDoc, deleteDocFromIndex } from "shared";
 import {
   PRODUCT_CONSUMER_GROUP,
   PRODUCT_INDEX,
@@ -23,12 +18,13 @@ export async function runProductConsumer(clientId: string) {
 
       switch (event.type) {
         case PRODUCT_EVENT.SYNC_ELASTIC_PRODUCTS_INSERT: {
-          await indexDoc(PRODUCT_INDEX, event.data);
+          await syncElasticProductService.syncElasticProductCreate(
+            event.data.id
+          );
           break;
         }
 
         case PRODUCT_EVENT.SYNC_ELASTIC_BULK_PRODUCTS_INSERT: {
-          console.log(JSON.stringify(event.data), ".....");
           await indexBulkDoc(PRODUCT_INDEX, event.data);
           break;
         }

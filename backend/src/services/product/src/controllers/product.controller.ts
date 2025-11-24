@@ -9,13 +9,23 @@ import {
 } from "shared";
 import { IProduct } from "../interfaces/product.interface";
 
-export async function searchproductsHandler(
+export async function autoCompleteSearchProductsHandler(
+  req: Request
+): Promise<IResponse<Partial<IProduct>[]>> {
+  const searchQuery = req?.validated?.query?.q;
+  const data = await productService.searchAutocomplete(searchQuery);
+  return { data };
+}
+
+export async function listProductsHandler(
   req: Request
 ): Promise<IPaginationResult<IProduct>> {
-  const { q, category, minPrice, maxPrice, page, limit } = req.validated?.query;
-  const { data, pagination } = await productService.searchProducts({
+  const { q, categoryId, minPrice, maxPrice, page, limit } =
+    req.validated?.query;
+
+  const { data, pagination } = await productService.listProducts({
     q,
-    category,
+    categoryId,
     minPrice,
     maxPrice,
     page,
@@ -62,7 +72,7 @@ export async function createProductHandler(
 export async function updateProductHandler(
   req: Request
 ): Promise<IResponse<IUpdated>> {
-  const { name, categoryId, description, image, items } = req.body;
+  const { name, categoryId, description, image, items } = req.validated?.body;
   const id = req?.validated?.params?.id;
   const data = await productService.updateProduct({
     name,
