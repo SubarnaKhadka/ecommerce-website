@@ -72,6 +72,7 @@ export async function getProductById(id: number): Promise<IProduct> {
 export async function createProduct({
   name,
   description,
+  brand,
   image,
   categoryId,
   items,
@@ -88,13 +89,14 @@ export async function createProduct({
       throw new BadRequestException("Invalid Category");
     }
 
-    const { slug } = productHelper.generateSlug(name);
+    const { slug } = productHelper.generateSlug(name, { allowRandom: true });
     const createdProduct = await productModel.createProduct(
       {
         categoryId: existingCategory.id,
         name,
         slug,
         description,
+        brand,
         image,
       },
       { client }
@@ -133,6 +135,7 @@ export async function createProduct({
 
         await productModel.createProductConfiguration(
           createdProductItem?.id,
+          existingVariationOption?.variation_id,
           variationOptionId,
           { client }
         );
@@ -267,6 +270,7 @@ export async function updateProduct({
   name,
   description,
   image,
+  brand,
   items,
   categoryId,
 }: Partial<IProduct>): Promise<IUpdated> {
@@ -302,6 +306,7 @@ export async function updateProduct({
       categoryId,
       description,
       image,
+      brand,
       name,
     });
     await client.query("COMMIT");

@@ -12,11 +12,13 @@ import {
 import userRoutes from "./routes/user.route";
 import { runUserConsumer } from "./consumers/user.consumer";
 import { USER_CLIENT_ID } from "./constants/user.constant";
+import { tenantResolver } from "shared";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(tenantResolver);
 app.use(transformResponse);
 app.use("/", userRoutes);
 Sentry.setupExpressErrorHandler(app);
@@ -25,7 +27,6 @@ app.use(catchHttpException);
 
 const PORT = 3004;
 app.listen(PORT, async () => {
-  console.log(`hello`);
   await connectProducer(USER_CLIENT_ID);
   runUserConsumer(USER_CLIENT_ID);
   console.log(`🚀 User service running on port ${PORT}`);

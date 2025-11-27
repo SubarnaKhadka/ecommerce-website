@@ -1,10 +1,12 @@
 import { PoolClient } from "pg";
-import { pgPool } from "../../database/postgres";
+import { getTenantContext } from "../../tenant/tenant-context";
 
 export async function queryDb(
   sql: string,
-  params: any[],
+  params?: any[],
   options?: { client?: PoolClient }
 ) {
-  return await (options?.client ?? pgPool).query(sql, params);
+  const tenantContext = getTenantContext();
+  const connection = options?.client ?? tenantContext.poolConnection;
+  return await connection.query(sql, params);
 }

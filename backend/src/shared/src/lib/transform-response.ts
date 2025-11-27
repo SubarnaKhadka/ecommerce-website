@@ -2,26 +2,43 @@ import { Response, Request, NextFunction } from "express";
 import { instanceToPlain } from "class-transformer";
 import { ObjectId } from "mongodb";
 
-function stringifyMongoId<T>(obj: T): T {
+interface TransformOptions {
+  stringifyMongoIds?: boolean;
+  excludeTenant?: boolean;
+}
+
+/**
+ * Recursively transform object/array:
+ * - Convert _id (ObjectId) to string
+ * - Remove tenant_id
+ */
+function transformObject<T>(obj: T, options: TransformOptions = {}): T {
+  const { stringifyMongoIds = true, excludeTenant = true } = options;
+
   if (Array.isArray(obj)) {
-    return obj.map(stringifyMongoId) as T;
+    return obj.map((item) => transformObject(item, options)) as T;
   }
+
   if (obj && typeof obj === "object") {
     const newObj: Record<string, unknown> = {};
+
     for (const key of Object.keys(obj)) {
-      if (
-        key === "_id" &&
-        (obj as Record<string, unknown>)[key] instanceof ObjectId
-      ) {
-        newObj[key] = (
-          (obj as Record<string, unknown>)[key] as ObjectId
-        ).toString();
+      const value = (obj as Record<string, unknown>)[key];
+
+      if (excludeTenant && key === "tenant_id") {
+        continue;
+      }
+
+      if (stringifyMongoIds && key === "_id" && value instanceof ObjectId) {
+        newObj[key] = value.toString();
       } else {
-        newObj[key] = stringifyMongoId((obj as Record<string, unknown>)[key]);
+        newObj[key] = transformObject(value, options);
       }
     }
+
     return newObj as T;
   }
+
   return obj;
 }
 
@@ -39,7 +56,7 @@ export const transformResponse = (
   res.json = (data: unknown) => {
     const transformed =
       typeof data === "object" && data !== null
-        ? instanceToPlain(stringifyMongoId(data))
+        ? instanceToPlain(transformObject(data))
         : data;
     return originalJson(transformed);
   };

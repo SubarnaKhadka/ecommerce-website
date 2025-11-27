@@ -1,6 +1,6 @@
 import { type PoolClient } from "pg";
 import { WithId, Document } from "mongodb";
-import { IPaginationResult, mongoDb, queryDb } from "shared";
+import { getTenantContext, IPaginationResult, mongoDb, queryDb } from "shared";
 
 import { UserDto } from "../dtos/user.dto";
 import { ICreateUser } from "../interfaces/user.interface";
@@ -11,8 +11,10 @@ export async function getUserByEmail(
     client: PoolClient;
   }
 ) {
-  const query = "SELECT * FROM site_user WHERE email_address = $1";
-  const results = await queryDb(query, [email], options);
+  const { tenantId } = getTenantContext();
+  const query =
+    "SELECT * FROM site_user WHERE email_address = $1 AND tenant_id=$2";
+  const results = await queryDb(query, [email, tenantId], options);
   const row = results?.rows?.[0];
   if (!row) return null;
   return new UserDto(row);
@@ -24,16 +26,19 @@ export async function getUserById(
     client?: PoolClient;
   }
 ) {
-  const query = "SELECT * FROM site_user WHERE id = $1";
-  const results = await queryDb(query, [id], options);
+  const { tenantId } = getTenantContext();
+  const query = "SELECT * FROM site_user WHERE id = $1 AND tenant_id=$2";
+  const results = await queryDb(query, [id, tenantId], options);
   const row = results?.rows?.[0];
   if (!row) return null;
   return new UserDto(row);
 }
 
 export async function getUserByRefreshToken(refreshToken: string) {
-  const query = "SELECT * FROM site_user WHERE refresh_token=$1";
-  const results = await queryDb(query, [refreshToken]);
+  const { tenantId } = getTenantContext();
+  const query =
+    "SELECT * FROM site_user WHERE refresh_token=$1 AND tenant_id=$2";
+  const results = await queryDb(query, [refreshToken, tenantId]);
   const row = results?.rows?.[0];
   if (!row) return null;
   return new UserDto(row);
@@ -45,10 +50,15 @@ export async function createUser(
     client?: PoolClient;
   }
 ) {
+  const { tenantId } = getTenantContext();
   const query =
-    "INSERT INTO site_user(email_address,phone_number,password) VALUES($1,$2,$3) RETURNING id,email_address";
+    "INSERT INTO site_user(email_address,phone_number,password,tenant_id) VALUES($1,$2,$3,$4) RETURNING id,email_address";
 
-  const results = await queryDb(query, [email, phone, passwordHash], options);
+  const results = await queryDb(
+    query,
+    [email, phone, passwordHash, tenantId],
+    options
+  );
   const row = results?.rows?.[0];
   if (!row) return null;
   return new UserDto(row);
@@ -61,11 +71,17 @@ export async function getFailedLogins({
   page: number;
   limit: number;
 }): Promise<IPaginationResult<WithId<Document>>> {
+  const { tenantId } = getTenantContext();
   const skip = (page - 1) * limit;
 
   const data = await mongoDb
     .collection("failed_logins")
-    .find({})
+    .find(
+      {
+        tenant_id: tenantId,
+      },
+      { projection: { tenant_id: 0 } }
+    )
     .skip(skip)
     .limit(limit)
     .toArray();

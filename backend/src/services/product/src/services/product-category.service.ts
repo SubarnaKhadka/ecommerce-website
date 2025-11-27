@@ -9,6 +9,7 @@ import {
   NotFoundException,
 } from "shared";
 import * as productCategoryModel from "../models/product-category.model";
+import * as productHelper from "../helpers/product.helper";
 import { IProductCategory } from "../interfaces/product-category.interface";
 
 export async function getAllProductCategory({
@@ -35,9 +36,12 @@ export async function createProductCategory({
     throw new ConflictException("Category name already exists");
   }
 
+  const { slug } = productHelper.generateSlug(name);
+
   return await productCategoryModel.createProductCategory({
     parentCategoryId,
     name,
+    slug,
   });
 }
 

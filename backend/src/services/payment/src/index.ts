@@ -1,4 +1,4 @@
-import { initSentry } from "shared";
+import { initSentry, tenantResolver } from "shared";
 initSentry();
 
 import express from "express";
@@ -10,6 +10,7 @@ import { PAYMENT_CLIENT_ID } from "./constants";
 const app = express();
 app.use(express.json());
 
+app.use(tenantResolver);
 app.use("/", paymentRoutes);
 Sentry.setupExpressErrorHandler(app);
 app.use(catchHttpException);

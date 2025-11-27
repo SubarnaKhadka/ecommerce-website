@@ -175,7 +175,6 @@ export async function loginUser(
       ip,
     },
   });
-
   return { accessToken, refreshToken };
 }
 

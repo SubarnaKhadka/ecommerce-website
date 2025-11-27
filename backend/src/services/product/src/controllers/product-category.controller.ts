@@ -34,7 +34,7 @@ export async function createProductCategoryHandler(
     name,
   });
 
-  return { data };
+  return { statusCode: 201, data };
 }
 
 export async function updateProductCategoryHandler(

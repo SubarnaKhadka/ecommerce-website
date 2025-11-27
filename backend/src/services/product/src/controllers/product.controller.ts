@@ -56,11 +56,13 @@ export async function getProductByIdHandler(
 export async function createProductHandler(
   req: Request
 ): Promise<IResponse<ICreated>> {
-  const { name, description, image, categoryId, items } = req.validated?.body;
+  const { name, description, image, categoryId, brand, items } =
+    req.validated?.body;
 
   const data = await productService.createProduct({
     name,
     description,
+    brand,
     image,
     categoryId,
     items,
@@ -72,12 +74,14 @@ export async function createProductHandler(
 export async function updateProductHandler(
   req: Request
 ): Promise<IResponse<IUpdated>> {
-  const { name, categoryId, description, image, items } = req.validated?.body;
+  const { name, categoryId, brand, description, image, items } =
+    req.validated?.body;
   const id = req?.validated?.params?.id;
   const data = await productService.updateProduct({
     name,
     description,
     image,
+    brand,
     items,
     categoryId,
     id,

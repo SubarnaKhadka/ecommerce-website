@@ -22,6 +22,7 @@ export interface IProduct {
   };
   name: string;
   description: string;
+  brand?: string;
   slug?: string;
   image?: string | null;
   categoryId: number;

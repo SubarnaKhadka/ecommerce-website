@@ -15,7 +15,7 @@ export const registerHandler = async (req: Request) => {
   const user = await userService.registerUser(email, password, phone);
 
   return {
-    status: HttpStatus.CREATED,
+    statusCode: HttpStatus.CREATED,
     data: {
       id: user.id,
     },

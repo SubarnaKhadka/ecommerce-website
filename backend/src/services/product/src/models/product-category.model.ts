@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 import {
   generatePartialUpdate,
+  getTenantContext,
   IPaginationRequest,
   IPaginationResult,
   PgPaginator,
@@ -29,11 +30,10 @@ export async function getCategoryById(
     client?: PoolClient;
   }
 ) {
-  const query = "SELECT * FROM product_category WHERE id=$1";
-  const results = await queryDb(query, [id], options);
-  const row = results?.rows?.[0];
-  if (!row) return null;
-  return row;
+  const { tenantId } = getTenantContext();
+  const query = "SELECT * FROM product_category WHERE id=$1 and tenant_id = $2";
+  const results = await queryDb(query, [id, tenantId], options);
+  return results?.rows?.[0];
 }
 
 export async function getCategoryByName(
@@ -42,28 +42,33 @@ export async function getCategoryByName(
     excludeId?: number;
   }
 ) {
-  const params = [name];
-  let query = "SELECT * FROM product_category WHERE category_name=$1";
+  const { tenantId } = getTenantContext();
+  const params = [name, tenantId];
+  let query =
+    "SELECT * FROM product_category WHERE category_name=$1 AND tenant_id = $2";
   if (options?.excludeId) {
-    query += " AND id!=$2";
+    query += " AND id!=$3";
     params.push(String(options?.excludeId));
   }
   const results = await queryDb(query, params);
-  const row = results?.rows?.[0];
-  if (!row) return null;
-  return row;
+  return results?.rows?.[0];
 }
 
 export async function createProductCategory({
   parentCategoryId,
   name,
+  slug,
 }: IProductCategory) {
+  const { tenantId } = getTenantContext();
   const query =
-    "INSERT INTO product_category(parent_category_id,category_name) VALUES($1,$2) RETURNING id";
-  const results = await queryDb(query, [parentCategoryId, name]);
-  const row = results?.rows?.[0];
-  if (!row) return null;
-  return row;
+    "INSERT INTO product_category(parent_category_id,category_name,slug,tenant_id) VALUES($1,$2,$3,$4) RETURNING id";
+  const results = await queryDb(query, [
+    parentCategoryId,
+    name,
+    slug,
+    tenantId,
+  ]);
+  return results?.rows?.[0];
 }
 
 export async function updateProductCategory({
@@ -71,6 +76,8 @@ export async function updateProductCategory({
   name,
   id,
 }: Partial<IProductCategory>) {
+  const { tenantId } = getTenantContext();
+
   const partialUpdate = generatePartialUpdate({
     parent_category_id: parentCategoryId,
     category_name: name,
@@ -80,19 +87,19 @@ export async function updateProductCategory({
   const query = [
     "UPDATE product_category SET",
     partialUpdate.setString,
-    `WHERE id=$${partialUpdate.values.length + 1} RETURNING id`,
+    `WHERE id=$${partialUpdate.values.length + 1} AND tenant_id=$${
+      partialUpdate.values.length + 2
+    } RETURNING id`,
   ].join(" ");
 
-  const results = await queryDb(query, [...partialUpdate.values, id]);
-  const row = results?.rows?.[0];
-  if (!row) return null;
-  return row;
+  const results = await queryDb(query, [...partialUpdate.values, id, tenantId]);
+  return results?.rows?.[0];
 }
 
 export async function deleteProductCategory(id: number) {
-  const query = "DELETE FROM product_category WHERE id=$1 RETURNING id";
-  const results = await queryDb(query, [id]);
-  const row = results?.rows?.[0];
-  if (!row) return null;
-  return row;
+  const { tenantId } = getTenantContext();
+  const query =
+    "DELETE FROM product_category WHERE id=$1 AND tenant_id=$2 RETURNING id";
+  const results = await queryDb(query, [id, tenantId]);
+  return results?.rows?.[0];
 }

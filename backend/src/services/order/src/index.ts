@@ -1,4 +1,4 @@
-import { initSentry } from "shared";
+import { initSentry, tenantResolver } from "shared";
 initSentry();
 
 import express from "express";
@@ -15,6 +15,7 @@ import { KAFKA_ORDER_CLIENT_ID } from "./constants";
 const app = express();
 app.use(express.json());
 
+app.use(tenantResolver);
 app.use("/", requireAuth, orderRoutes);
 Sentry.setupExpressErrorHandler(app);
 app.use(catchHttpException);

@@ -1,6 +1,7 @@
 import { PoolClient } from "pg";
 import {
   generatePartialUpdate,
+  getTenantContext,
   IPaginationResult,
   PaginateDto,
   queryDb,
@@ -15,14 +16,14 @@ export async function getVariantById(
   id: IProductVariant["id"],
   options?: { client?: PoolClient }
 ) {
-  const query = "SELECT * FROM variation WHERE id=$1 LIMIT 1";
-  const results = await queryDb(query, [id], options);
-  const row = results?.rows?.[0];
-  if (!row) return null;
-  return row;
+  const { tenantId } = getTenantContext();
+  const query = "SELECT * FROM variation WHERE id=$1 AND tenant_id=$2 LIMIT 1";
+  const results = await queryDb(query, [id, tenantId], options);
+  return results?.rows?.[0];
 }
 
 export async function getVariantByIdWithOption(id: number) {
+  const { tenantId } = getTenantContext();
   const query = `
   SELECT
   v.id,
@@ -40,14 +41,12 @@ export async function getVariantByIdWithOption(id: number) {
     ON v.category_id = c.id
   LEFT JOIN variation_option AS o
     ON v.id = o.variation_id
-  WHERE v.id=$1  
+  WHERE v.id=$1 AND tenant_id=$2
   GROUP BY v.id, c.category_name
   LIMIT 1
   `;
-  const results = await queryDb(query, [id]);
-  const row = results?.rows?.[0];
-  if (!row) return null;
-  return row;
+  const results = await queryDb(query, [id, tenantId]);
+  return results?.rows?.[0];
 }
 
 export async function getProductVariants({
@@ -55,11 +54,12 @@ export async function getProductVariants({
   limit = 20,
   search,
 }: PaginateDto): Promise<IPaginationResult<IProductVariant>> {
+  const { tenantId } = getTenantContext();
   const offset = (page - 1) * limit;
 
   const countResult = await queryDb(
-    `SELECT COUNT(*) AS total FROM variation WHERE name ILIKE $1`,
-    [[`%${search ?? ""}%`]]
+    `SELECT COUNT(*) AS total FROM variation WHERE name ILIKE $1 AND tenant_id=$2`,
+    [[`%${search ?? ""}%`, tenantId]]
   );
   const total = Number(countResult?.rows?.[0]?.total || 0);
 
@@ -80,12 +80,17 @@ export async function getProductVariants({
     ON v.category_id = c.id
   LEFT JOIN variation_option AS o 
     ON v.id = o.variation_id
-  WHERE v.name ILIKE $1
+  WHERE v.name ILIKE $1 AND tenant_id=$4
   GROUP BY v.id, c.category_name
   ORDER BY v.id DESC
   LIMIT $2 OFFSET $3
   `;
-  const results = await queryDb(query, [`%${search}%`, limit, offset]);
+  const results = await queryDb(query, [
+    `%${search}%`,
+    limit,
+    offset,
+    tenantId,
+  ]);
   const data = results?.rows;
 
   const totalPages = Math.ceil(total / limit);
@@ -107,6 +112,7 @@ export async function getVariationsByCategoryId(
     client: PoolClient;
   }
 ) {
+  const { tenantId } = getTenantContext();
   const query = `
 SELECT 
   v.id,
@@ -119,17 +125,19 @@ SELECT
 FROM variation AS v
 LEFT JOIN variation_option AS vo
   ON vo.variation_id = v.id
-WHERE v.category_id = $1
+WHERE v.category_id = $1 AND tenant_id=$2
 GROUP BY v.id
 ORDER BY v.id;
 `;
-  const results = await queryDb(query, [categoryId], options);
+  const results = await queryDb(query, [categoryId, tenantId], options);
   return results?.rows;
 }
 
 export async function getAllVariationOptions(variantId: number) {
-  const query = "SELECT value FROM variation_option WHERE variation_id=$1";
-  const results = await queryDb(query, [variantId]);
+  const { tenantId } = getTenantContext();
+  const query =
+    "SELECT value FROM variation_option WHERE variation_id=$1 AND tenant_id=$2";
+  const results = await queryDb(query, [variantId, tenantId]);
   return results?.rows;
 }
 
@@ -139,8 +147,10 @@ export async function getVariationOptionById(
     client?: PoolClient;
   }
 ) {
-  const query = "SELECT * FROM variation_option WHERE id=$1 LIMIT 1";
-  const results = await queryDb(query, [id], options);
+  const { tenantId } = getTenantContext();
+  const query =
+    "SELECT * FROM variation_option WHERE id=$1 AND tenant_id=$2 LIMIT 1";
+  const results = await queryDb(query, [id, tenantId], options);
   return results?.rows?.[0];
 }
 
@@ -148,16 +158,17 @@ export async function bulkInsertProductVariationOptions(
   variationId: number,
   toInsert: string[]
 ) {
+  const { tenantId } = getTenantContext();
   const values: string[] = [];
   const params: any[] = [];
   toInsert.forEach((value, i) => {
-    const idx = i * 2;
-    values.push(`($${idx + 1}, $${idx + 2})`);
-    params.push(variationId, value);
+    const idx = i * 3;
+    values.push(`($${idx + 1}, $${idx + 2}, $${idx + 3}))`);
+    params.push(variationId, value, tenantId);
   });
 
   const query = `
-      INSERT INTO variation_option (variation_id, value)
+      INSERT INTO variation_option (variation_id, value, tenant_id)
       VALUES ${values.join(", ")}
       ON CONFLICT (variation_id, value) DO NOTHING
     `;
@@ -169,24 +180,25 @@ export async function createProductVariant({
   name,
   categoryId,
 }: IProductVariant) {
+  const { tenantId } = getTenantContext();
   const query =
-    "INSERT INTO variation(category_id,name) VALUES($1,$2) RETURNING id";
-  const results = await queryDb(query, [categoryId, name]);
-  const row = results?.rows?.[0];
-  if (!row) return null;
-  return row;
+    "INSERT INTO variation(category_id,name, tenant_id) VALUES($1,$2,$3) RETURNING id";
+  const results = await queryDb(query, [categoryId, name, tenantId]);
+  return results?.rows?.[0];
 }
 
 export async function createProductVariantOption({
   value,
   variationId,
 }: IProductVariantOption) {
+  const { tenantId } = getTenantContext();
   const query =
-    "INSERT INTO variation_option(variation_id,value) VALUES($1,$2) ON CONFLICT (variation_id, value) DO NOTHING";
-  await queryDb(query, [variationId, value]);
+    "INSERT INTO variation_option(variation_id,value, tenant_id) VALUES($1,$2,$3) ON CONFLICT (variation_id, value) DO NOTHING";
+  await queryDb(query, [variationId, value, tenantId]);
 }
 
 export async function updateProductVariant({ name, id }: any) {
+  const { tenantId } = getTenantContext();
   const partialUpdate = generatePartialUpdate({
     name: name,
   });
@@ -195,18 +207,20 @@ export async function updateProductVariant({ name, id }: any) {
   const query = [
     "UPDATE variation SET",
     partialUpdate.setString,
-    `WHERE id=$${partialUpdate.values.length + 1} RETURNING id`,
+    `WHERE id=$${partialUpdate.values.length + 1} AND tenant_id=$${
+      partialUpdate.values.length + 2
+    } RETURNING id`,
   ].join(" ");
 
-  const results = await queryDb(query, [...partialUpdate.values, id]);
-  const row = results?.rows?.[0];
-  if (!row) return null;
-  return row;
+  const results = await queryDb(query, [...partialUpdate.values, id, tenantId]);
+  return results?.rows?.[0];
 }
 
 export async function deleteProductVariant(id: number) {
-  const query = "DELETE FROM variation WHERE id=$1 RETURNING id";
-  const results = await queryDb(query, [id]);
+  const { tenantId } = getTenantContext();
+  const query =
+    "DELETE FROM variation WHERE id=$1 AND tenant_id=$2 RETURNING id";
+  const results = await queryDb(query, [id, tenantId]);
   return results?.rows?.[0];
 }
 
@@ -214,9 +228,10 @@ export async function bulkDeleteProductVariationOptions(
   variationId: number,
   toDelete: string[]
 ) {
+  const { tenantId } = getTenantContext();
   const query =
-    "DELETE FROM variation_option WHERE variation_id=$1 AND value=ANY($2)";
-  await queryDb(query, [variationId, toDelete]);
+    "DELETE FROM variation_option WHERE variation_id=$1 AND tenant_id=$2 AND value=ANY($3)";
+  await queryDb(query, [variationId, tenantId, toDelete]);
 }
 
 export async function isVariationNameUnique(
@@ -226,10 +241,11 @@ export async function isVariationNameUnique(
     excludeId?: number;
   }
 ) {
-  let query = `SELECT id FROM variation WHERE category_id=$1 AND name=$2`;
-  const params = [categoryId, name];
+  const { tenantId } = getTenantContext();
+  let query = `SELECT id FROM variation WHERE category_id=$1 AND name=$2 AND tenant_id=$3`;
+  const params = [categoryId, name, tenantId];
   if (options?.excludeId) {
-    query += ` AND id != $3`;
+    query += ` AND id != $4`;
     params.push(options?.excludeId);
   }
 
@@ -242,10 +258,11 @@ export async function isVariationOptionUnique(
   value: string,
   options?: { excludeId: number }
 ) {
-  let query = `SELECT id FROM variation_option WHERE variation_id=$1 AND value=$2 LIMIT 1`;
-  const params = [variationId, value];
+  const { tenantId } = getTenantContext();
+  let query = `SELECT id FROM variation_option WHERE variation_id=$1 AND value=$2 AND tenant_id=$3 LIMIT 1`;
+  const params = [variationId, value, tenantId];
   if (options?.excludeId) {
-    query += ` AND id != $3`;
+    query += ` AND id != $4`;
     params.push(options?.excludeId);
   }
 

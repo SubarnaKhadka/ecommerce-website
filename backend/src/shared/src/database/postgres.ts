@@ -9,11 +9,14 @@ const {
   db_name: database,
 } = config.database;
 
-export const pgPool = new Pool({
-  host,
-  port,
-  user,
-  password,
-  database,
-  max: 20,
-});
+export function createPgConnection(dbName: string) {
+  return new Pool({
+    host,
+    port,
+    user,
+    password,
+    database: dbName,
+  });
+}
+
+export const pgPool = createPgConnection(database);

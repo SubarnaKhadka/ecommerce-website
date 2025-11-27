@@ -30,6 +30,7 @@ export async function createIndex() {
                 category_name: { type: "text" },
               },
             },
+            brand: { type: "text" },
             items: {
               type: "nested",
               properties: {

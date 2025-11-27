@@ -15,8 +15,8 @@ export function wrapAllRoutes(router: Router): Router {
             const result = await originalHandler(req, res, next);
 
             if (!res.headersSent && result !== undefined) {
-              const { status = 200, ...rest } = result;
-              res.status(status).json({ statusCode: status, ...rest });
+              const { statusCode = 200, ...rest } = result;
+              res.status(statusCode).json({ statusCode, ...rest });
             }
           } catch (err) {
             next(err);

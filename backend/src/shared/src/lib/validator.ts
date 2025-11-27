@@ -44,7 +44,6 @@ export const validator =
       req.validated[source] = dtoInstance;
       return next();
     } catch (err) {
-      console.log(err);
       next(err);
     }
   };

@@ -1,5 +1,6 @@
-import { IPaginationResult } from "shared/types/pagination/paginate.interface";
+import { IPaginationResult } from "../../types/pagination/paginate.interface";
 import { queryDb } from "./query-db";
+import { getTenantContext } from "../../tenant";
 
 export interface PaginationOptions {
   page?: number;
@@ -33,6 +34,7 @@ export class PgPaginator {
     table: string,
     options: PaginationOptions = {}
   ): Promise<IPaginationResult<T>> {
+    const { tenantId } = getTenantContext();
     const { page = 1, limit = 20, search = {}, searchMode = "OR" } = options;
 
     const offset = (page - 1) * limit;
@@ -47,15 +49,18 @@ export class PgPaginator {
       }
     }
 
+    params.push(tenantId);
+    whereParts.push(`tenant_id = $${params.length}`);
+
     const whereClause = whereParts.length
       ? `WHERE ${whereParts.join(` ${searchMode} `)}`
       : "";
 
     const countQuery = `
-      SELECT COUNT(*) AS total
-      FROM ${table}
-      ${whereClause}
-    `;
+    SELECT COUNT(*) AS total
+    FROM ${table}
+    ${whereClause}
+  `;
 
     const countResult = await queryDb(countQuery, params);
     const total = Number(countResult.rows[0].total);
@@ -68,12 +73,12 @@ export class PgPaginator {
     const offsetIndex = params.length;
 
     const query = `
-      SELECT *
-      FROM ${table}
-      ${whereClause}
-      ORDER BY id DESC
-      LIMIT $${limitIndex} OFFSET $${offsetIndex}
-    `;
+    SELECT * 
+    FROM ${table}
+    ${whereClause}
+    ORDER BY id DESC
+    LIMIT $${limitIndex} OFFSET $${offsetIndex}
+  ;`;
 
     const result = await queryDb(query, params);
 

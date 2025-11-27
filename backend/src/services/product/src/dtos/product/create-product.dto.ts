@@ -58,6 +58,10 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
+  brand?: string;
+
+  @IsOptional()
+  @IsString()
   @IsUrl()
   image?: string | null;
 

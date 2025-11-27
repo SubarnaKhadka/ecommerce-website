@@ -1,4 +1,4 @@
-import { Sentry, initSentry, transformResponse } from "shared";
+import { Sentry, initSentry, tenantResolver, transformResponse } from "shared";
 initSentry();
 
 import express from "express";
@@ -14,6 +14,7 @@ import productVariationRoute from "./routes/product-variation.route";
 const app = express();
 app.use(express.json());
 
+app.use(tenantResolver);
 app.use(transformResponse);
 app.use("/category", productCategoryRoute);
 app.use("/variants", productVariationRoute);
