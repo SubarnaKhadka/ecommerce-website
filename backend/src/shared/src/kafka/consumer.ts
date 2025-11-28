@@ -1,5 +1,5 @@
-import { EachMessagePayload } from "kafkajs";
-import { getKafkaClient } from "./client";
+import type { EachMessagePayload } from 'kafkajs';
+import { getKafkaClient } from './client';
 
 export async function startConsumer(
   clientId: string,
@@ -18,7 +18,7 @@ export async function startConsumer(
       try {
         await eachMessageHandler(payload);
       } catch (err) {
-        console.error("❌ Error processing Kafka message:", err);
+        console.error('❌ Error processing Kafka message:', err);
       }
     },
   });

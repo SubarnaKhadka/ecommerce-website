@@ -1,21 +1,17 @@
-import z from "zod";
+import z from 'zod';
 
 export const envSchema = z.object({
   HTTP_PORT: z.preprocess((val) => Number(val), z.number()).default(3000),
-  APP_ENV: z.enum(["development", "production", "test"]).default("development"),
+  APP_ENV: z.enum(['development', 'production', 'test']).default('development'),
   APP_NAME: z.string(),
 
-  JWT_ISSUER: z.string().default("ecommerce-website"),
-  ACCESS_TOKEN_EXP: z.string().default("15m"),
-  REFRESH_TOKEN_EXP: z.string().default("14d"),
+  JWT_ISSUER: z.string().default('ecommerce-website'),
+  ACCESS_TOKEN_EXP: z.string().default('15m'),
+  REFRESH_TOKEN_EXP: z.string().default('14d'),
   SECRET_KEY: z.string(),
-  MAX_FAILED_ATTEMPT: z
-    .preprocess((val) => Number(val), z.number())
-    .default(10),
+  MAX_FAILED_ATTEMPT: z.preprocess((val) => Number(val), z.number()).default(10),
   BLOCK_MINUTES: z.preprocess((val) => Number(val), z.number()).default(15),
-  FAILED_WINDOW_MINUTES: z
-    .preprocess((val) => Number(val), z.number())
-    .default(15),
+  FAILED_WINDOW_MINUTES: z.preprocess((val) => Number(val), z.number()).default(15),
 
   DB_HOST: z.string(),
   DB_PORT: z.preprocess((val) => Number(val), z.number()).default(5432),
@@ -26,7 +22,7 @@ export const envSchema = z.object({
   MONGO_URI: z.string(),
   MONGO_DB_NAME: z.string(),
 
-  REDIS_HOST: z.string().default("localhost"),
+  REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z.preprocess((val) => Number(val), z.number()).default(6379),
 
   SENTRY_DSN: z.string(),

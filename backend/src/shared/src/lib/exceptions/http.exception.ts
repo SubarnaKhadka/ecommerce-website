@@ -1,5 +1,5 @@
 export class HttpException extends Error {
-  public name: string = "HttpException";
+  public name: string = 'HttpException';
   public statusCode: number;
   public errors?: string[];
 

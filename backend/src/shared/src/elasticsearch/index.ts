@@ -1,2 +1,2 @@
-export * from "./client";
-export * from "./elasticsearch.service";
+export * from './client';
+export * from './elasticsearch.service';

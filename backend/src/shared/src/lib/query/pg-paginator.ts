@@ -1,12 +1,12 @@
-import { IPaginationResult } from "../../types/pagination/paginate.interface";
-import { queryDb } from "./query-db";
-import { getTenantContext } from "../../tenant";
+import type { IPaginationResult } from '../../types/pagination/paginate.interface';
+import { queryDb } from './query-db';
+import { getTenantContext } from '../../tenant';
 
 export interface PaginationOptions {
   page?: number;
   limit?: number;
   search?: Record<string, string | undefined>;
-  searchMode?: "OR" | "AND";
+  searchMode?: 'OR' | 'AND';
 }
 
 export class PgPaginator {
@@ -23,19 +23,14 @@ export class PgPaginator {
 
   static getInstance(): PgPaginator {
     if (!PgPaginator.instance) {
-      throw new Error(
-        "PgPaginator is not initialized. Call PgPaginator.init(queryDb) first."
-      );
+      throw new Error('PgPaginator is not initialized. Call PgPaginator.init(queryDb) first.');
     }
     return PgPaginator.instance;
   }
 
-  async paginate<T>(
-    table: string,
-    options: PaginationOptions = {}
-  ): Promise<IPaginationResult<T>> {
+  async paginate<T>(table: string, options: PaginationOptions = {}): Promise<IPaginationResult<T>> {
     const { tenantId } = getTenantContext();
-    const { page = 1, limit = 20, search = {}, searchMode = "OR" } = options;
+    const { page = 1, limit = 20, search = {}, searchMode = 'OR' } = options;
 
     const offset = (page - 1) * limit;
 
@@ -43,7 +38,7 @@ export class PgPaginator {
     const whereParts: string[] = [];
 
     for (const [field, value] of Object.entries(search)) {
-      if (value && value.trim() !== "") {
+      if (value && value.trim() !== '') {
         params.push(`%${value}%`);
         whereParts.push(`${field} ILIKE $${params.length}`);
       }
@@ -52,9 +47,7 @@ export class PgPaginator {
     params.push(tenantId);
     whereParts.push(`tenant_id = $${params.length}`);
 
-    const whereClause = whereParts.length
-      ? `WHERE ${whereParts.join(` ${searchMode} `)}`
-      : "";
+    const whereClause = whereParts.length ? `WHERE ${whereParts.join(` ${searchMode} `)}` : '';
 
     const countQuery = `
     SELECT COUNT(*) AS total

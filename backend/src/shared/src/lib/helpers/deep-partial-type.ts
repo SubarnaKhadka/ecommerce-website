@@ -1,18 +1,15 @@
-import "reflect-metadata";
-import { ValidationTypes, getMetadataStorage } from "class-validator";
+import 'reflect-metadata';
+import { ValidationTypes, getMetadataStorage } from 'class-validator';
 
 function getMetadataStorageSafe() {
-  return ((global as any).classValidatorMetadataStorage ??=
-    getMetadataStorage());
+  return ((global as any).classValidatorMetadataStorage ??= getMetadataStorage());
 }
 
 function isClass(v: any) {
-  return typeof v === "function" && /^\s*class\s+/.test(v.toString());
+  return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
 }
 
-export function DeepPartialType<T extends new (...args: any[]) => any>(
-  BaseClass: T
-) {
+export function DeepPartialType<T extends new (...args: any[]) => any>(BaseClass: T) {
   class PartialClass extends BaseClass {}
 
   const metadataStorage = getMetadataStorageSafe();
@@ -30,16 +27,12 @@ export function DeepPartialType<T extends new (...args: any[]) => any>(
       constraints: [(_obj: any, value: any) => value !== undefined],
       validationTypeOptions: {},
       constraintCls: undefined,
-      message: "",
+      message: '',
       groups: [],
       each: false,
     } as any);
 
-    const designType = Reflect.getMetadata(
-      "design:type",
-      BaseClass.prototype,
-      meta.propertyName
-    );
+    const designType = Reflect.getMetadata('design:type', BaseClass.prototype, meta.propertyName);
     if (isClass(designType)) {
       const NestedPartial = DeepPartialType(designType);
       Object.defineProperty(PartialClass.prototype, meta.propertyName, {

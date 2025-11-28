@@ -1,7 +1,7 @@
-import { HttpException } from "./http.exception";
+import { HttpException } from './http.exception';
 
 export class NotFoundException extends HttpException {
-  public name = "NotFoundException";
+  public name = 'NotFoundException';
 
   /**
    * Instantiates a `NotFoundException` Exception with status code 404.
@@ -12,7 +12,7 @@ export class NotFoundException extends HttpException {
    * @example
    * `throw new NotFoundException()`
    */
-  public constructor(message: string = "Not Found") {
+  public constructor(message: string = 'Not Found') {
     super(404, message);
   }
 }

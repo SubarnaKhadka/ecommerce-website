@@ -1,11 +1,10 @@
-import "../load-env";
-import configs from "./configs";
-import { envSchema } from "./env.schema";
+import '../load-env';
+import configs from './configs';
+import { envSchema } from './env.schema';
 
-type ConfigFromArray<T extends { name: string; factory: (env: any) => any }[]> =
-  {
-    [K in T[number] as K["name"]]: ReturnType<K["factory"]>;
-  };
+type ConfigFromArray<T extends { name: string; factory: (env: any) => any }[]> = {
+  [K in T[number] as K['name']]: ReturnType<K['factory']>;
+};
 
 const parsed = envSchema.safeParse(process.env);
 

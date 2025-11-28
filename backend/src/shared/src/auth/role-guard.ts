@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { ForbiddenException, UnauthorizedException } from "shared";
+import type { Request, Response, NextFunction } from 'express';
+import { ForbiddenException, UnauthorizedException } from 'shared';
 
 export function roleGuard(...allowedRoles: string[]) {
   return function (req: Request, res: Response, next: NextFunction) {

@@ -1,7 +1,7 @@
-import { HttpException } from "./http.exception";
+import { HttpException } from './http.exception';
 
 export class ForbiddenException extends HttpException {
-  public name = "ForbiddenException";
+  public name = 'ForbiddenException';
 
   /**
    * Instantiates a `ForbiddenException` Exception with status code 403.
@@ -12,7 +12,7 @@ export class ForbiddenException extends HttpException {
    * @example
    * `throw new ForbiddenException()`
    */
-  public constructor(message: string = "Forbidden") {
+  public constructor(message: string = 'Forbidden') {
     super(403, message);
   }
 }

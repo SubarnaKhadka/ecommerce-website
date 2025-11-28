@@ -1,7 +1,7 @@
-import { AsyncLocalStorage } from "async_hooks";
-import { Pool } from "pg";
-import { ITenant } from "../types";
-import { createPgConnection, pgPool } from "../database";
+import { AsyncLocalStorage } from 'async_hooks';
+import type { Pool } from 'pg';
+import type { ITenant } from '../types';
+import { createPgConnection, pgPool } from '../database';
 
 export const tenantContext = new AsyncLocalStorage<{
   tenantId: number;
@@ -12,7 +12,7 @@ export const connections: Record<string, Pool> = {};
 
 export function getTenantContext() {
   const store = tenantContext.getStore();
-  if (!store) throw new Error("No tenant context available");
+  if (!store) throw new Error('No tenant context available');
   return store;
 }
 

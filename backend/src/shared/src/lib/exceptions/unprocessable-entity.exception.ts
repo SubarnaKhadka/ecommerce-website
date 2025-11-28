@@ -1,7 +1,7 @@
-import { HttpException } from "./http.exception";
+import { HttpException } from './http.exception';
 
 export class UnprocessableEntityException extends HttpException {
-  public name = "UnprocessableEntityException";
+  public name = 'UnprocessableEntityException';
 
   /**
    * Instantiates an `UnprocessableEntityException` Exception with status code 422.
@@ -12,10 +12,7 @@ export class UnprocessableEntityException extends HttpException {
    * @example
    * `throw new UnprocessableEntityException()`
    */
-  public constructor(
-    message: string = "Unprocessable Entity",
-    errors?: string[]
-  ) {
+  public constructor(message: string = 'Unprocessable Entity', errors?: string[]) {
     super(422, message, errors);
   }
 }

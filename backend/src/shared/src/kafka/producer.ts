@@ -1,7 +1,7 @@
-import type { Producer } from "kafkajs";
+import type { Producer } from 'kafkajs';
 
-import { Sentry } from "../sentry";
-import { getKafkaClient } from "./client";
+import { Sentry } from '../sentry';
+import { getKafkaClient } from './client';
 
 let producerInstance: Producer | null = null;
 
@@ -11,13 +11,12 @@ export async function connectProducer(clientId: string) {
     const producer = kafka.producer();
     await producer.connect();
     producerInstance = producer;
-    console.log("✅ Kafka Producer connected");
+    console.log('✅ Kafka Producer connected');
   }
 }
 
 export function getProducer() {
-  if (!producerInstance)
-    throw new Error("Producer not connected. Call connectProducer() first.");
+  if (!producerInstance) throw new Error('Producer not connected. Call connectProducer() first.');
   return producerInstance;
 }
 

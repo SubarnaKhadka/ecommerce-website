@@ -1,5 +1,5 @@
-import { Kafka } from "kafkajs";
-import { config } from "../config";
+import { Kafka } from 'kafkajs';
+import { config } from '../config';
 
 const {
   order_topic,
@@ -13,7 +13,7 @@ const {
 
 const kafka = new Kafka({
   clientId: kafka_client_id,
-  brokers: kafka_brokers?.split(","),
+  brokers: kafka_brokers?.split(','),
 });
 
 export const TOPICS = {

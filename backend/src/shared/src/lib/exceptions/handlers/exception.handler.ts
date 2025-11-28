@@ -1,12 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import { HttpException } from "../http.exception";
+import type { Request, Response, NextFunction } from 'express';
+import { HttpException } from '../http.exception';
 
-export function catchHttpException(
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export function catchHttpException(err: Error, req: Request, res: Response, next: NextFunction) {
   if (err instanceof HttpException) {
     return res.status(err.statusCode).json({
       statusCode: err.statusCode,
@@ -16,7 +11,7 @@ export function catchHttpException(
   }
 
   return res.status(500).json({
-    message: "Internal Server Error",
+    message: 'Internal Server Error',
     statusCode: 500,
   });
 }

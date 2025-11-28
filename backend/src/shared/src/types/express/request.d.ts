@@ -1,4 +1,4 @@
-import * as express from "express";
+import 'express';
 
 declare global {
   namespace Express {
@@ -11,7 +11,7 @@ declare global {
   }
 }
 
-declare module "express-serve-static-core" {
+declare module 'express-serve-static-core' {
   interface Request {
     validated?: {
       body?: any;

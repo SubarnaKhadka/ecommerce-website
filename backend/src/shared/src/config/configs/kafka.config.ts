@@ -1,6 +1,6 @@
-import { registerAs } from "../register-as";
+import { registerAs } from '../register-as';
 
-export const kafkaConfig = registerAs("kafka", (env) => ({
+export const kafkaConfig = registerAs('kafka', (env) => ({
   kafka_brokers: env.KAFKA_BROKERS,
   kafka_client_id: env.KAFKA_CLIENT_ID,
 

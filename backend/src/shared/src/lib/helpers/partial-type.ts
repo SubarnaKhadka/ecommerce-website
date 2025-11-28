@@ -1,14 +1,13 @@
-import "reflect-metadata";
-import { MetadataStorage, ValidationTypes } from "class-validator";
+import 'reflect-metadata';
+import type { MetadataStorage } from 'class-validator';
+import { ValidationTypes } from 'class-validator';
 
 function getMetadataStorage(): MetadataStorage {
   return ((global as any).classValidatorMetadataStorage ??=
-    require("class-validator/cjs/metadata/MetadataStorage").getMetadataStorage());
+    require('class-validator/cjs/metadata/MetadataStorage').getMetadataStorage());
 }
 
-export function PartialType<T extends new (...args: any[]) => any>(
-  BaseClass: T
-) {
+export function PartialType<T extends new (...args: any[]) => any>(BaseClass: T) {
   class PartialClass extends BaseClass {}
 
   const metadataStorage = getMetadataStorage();
@@ -32,7 +31,7 @@ export function PartialType<T extends new (...args: any[]) => any>(
       constraints: [(_obj: any, value: any) => value !== undefined],
       validationTypeOptions: {},
       constraintCls: undefined,
-      message: "",
+      message: '',
       groups: [],
       each: false,
     } as any);

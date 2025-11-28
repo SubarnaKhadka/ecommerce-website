@@ -1,6 +1,6 @@
-import { registerAs } from "../register-as";
+import { registerAs } from '../register-as';
 
-export const gatewayConfig = registerAs("gateway", (env) => ({
+export const gatewayConfig = registerAs('gateway', (env) => ({
   order_service_url: env.ORDER_SERVICE_URL,
   payment_service_url: env.PAYMENT_SERVICE_URL,
   product_service_url: env.PRODUCT_SERVICE_URL,

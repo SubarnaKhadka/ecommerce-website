@@ -1,5 +1,5 @@
-import { config } from "../config";
-import { esClient } from "./client";
+import { config } from '../config';
+import { esClient } from './client';
 
 export async function indexDoc(index: string, doc: any) {
   await esClient.index({
@@ -9,7 +9,7 @@ export async function indexDoc(index: string, doc: any) {
   });
 
   // auto-refresh every second, only for development for immediate search visibility
-  if (config.app.app_env === "development") {
+  if (config.app.app_env === 'development') {
     await esClient.indices.refresh({ index });
   }
 }
@@ -26,10 +26,10 @@ export async function indexBulkDoc(index: string, docs: any[]) {
   const result = await esClient.bulk({ body: ops });
 
   if (result.errors) {
-    console.error("Bulk insert had errors:", result.items);
+    console.error('Bulk insert had errors:', result.items);
   }
 
-  if (config.app.app_env === "development") {
+  if (config.app.app_env === 'development') {
     await esClient.indices.refresh({ index });
   }
 }

@@ -1,5 +1,5 @@
-import { Kafka, logLevel } from "kafkajs";
-import { config } from "../config";
+import { Kafka, logLevel } from 'kafkajs';
+import { config } from '../config';
 
 let kafkaClientInstance: Kafka | null = null;
 
@@ -9,7 +9,7 @@ export function getKafkaClient(clientId: string): Kafka {
   if (!kafkaClientInstance) {
     kafkaClientInstance = new Kafka({
       clientId: clientId,
-      brokers: kafka_brokers.split(","),
+      brokers: kafka_brokers.split(','),
       logLevel: logLevel.ERROR,
     });
   }

@@ -1,14 +1,13 @@
-import { Request, Response, NextFunction } from "express";
-import { verifyAccessToken } from "./jwt";
-import { UnauthorizedException } from "shared";
+import type { Request, Response, NextFunction } from 'express';
+import { verifyAccessToken } from './jwt';
+import { UnauthorizedException } from 'shared';
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer"))
-    throw new UnauthorizedException();
+  if (!authHeader || !authHeader.startsWith('Bearer')) throw new UnauthorizedException();
 
-  const [_, token] = authHeader.split(" ");
+  const [_, token] = authHeader.split(' ');
 
   try {
     const payload = verifyAccessToken(token);

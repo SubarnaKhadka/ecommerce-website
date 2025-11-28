@@ -1,6 +1,6 @@
-import { registerAs } from "../register-as";
+import { registerAs } from '../register-as';
 
-export const databaseConfig = registerAs("database", (env) => ({
+export const databaseConfig = registerAs('database', (env) => ({
   db_host: env.DB_HOST,
   db_port: env.DB_PORT,
   db_user: env.DB_USER,

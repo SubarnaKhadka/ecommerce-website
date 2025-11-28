@@ -1,4 +1,4 @@
-import "reflect-metadata";
+import 'reflect-metadata';
 
 export function OmitType<T extends { new (...args: any[]): any }>(
   BaseClass: T,
@@ -16,30 +16,18 @@ export function OmitType<T extends { new (...args: any[]): any }>(
   const propertyNames = Object.getOwnPropertyNames(BaseClass.prototype);
 
   for (const propertyKey of propertyNames) {
-    if (propertyKey === "constructor") continue;
+    if (propertyKey === 'constructor') continue;
     if (omitted.has(propertyKey)) continue;
 
-    const descriptor = Object.getOwnPropertyDescriptor(
-      BaseClass.prototype,
-      propertyKey
-    );
+    const descriptor = Object.getOwnPropertyDescriptor(BaseClass.prototype, propertyKey);
     if (descriptor) {
       Object.defineProperty(OmitClass.prototype, propertyKey, descriptor);
     }
 
     const keys = Reflect.getMetadataKeys(BaseClass.prototype, propertyKey);
     for (const metadataKey of keys) {
-      const metadata = Reflect.getMetadata(
-        metadataKey,
-        BaseClass.prototype,
-        propertyKey
-      );
-      Reflect.defineMetadata(
-        metadataKey,
-        metadata,
-        OmitClass.prototype,
-        propertyKey
-      );
+      const metadata = Reflect.getMetadata(metadataKey, BaseClass.prototype, propertyKey);
+      Reflect.defineMetadata(metadataKey, metadata, OmitClass.prototype, propertyKey);
     }
   }
 

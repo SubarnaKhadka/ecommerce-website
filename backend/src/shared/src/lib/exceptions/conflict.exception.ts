@@ -1,7 +1,7 @@
-import { HttpException } from "./http.exception";
+import { HttpException } from './http.exception';
 
 export class ConflictException extends HttpException {
-  public name = "ConflictException";
+  public name = 'ConflictException';
 
   /**
    * Instantiates a `ConflictException` Exception with status code 409.
@@ -12,7 +12,7 @@ export class ConflictException extends HttpException {
    * @example
    * `throw new ConflictException()`
    */
-  public constructor(message: string = "Conflict") {
+  public constructor(message: string = 'Conflict') {
     super(409, message);
   }
 }

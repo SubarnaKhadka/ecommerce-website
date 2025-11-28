@@ -1,2 +1,2 @@
-export * from "./paginate.dto";
-export * from "./params.dto";
+export * from './paginate.dto';
+export * from './params.dto';

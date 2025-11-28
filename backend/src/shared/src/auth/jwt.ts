@@ -1,8 +1,9 @@
-import crypto from "crypto";
-import ms from "ms";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import crypto from 'crypto';
+import ms from 'ms';
+import type { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
-import { config } from "../config";
+import { config } from '../config';
 
 const { issuer, accessExp, secret: secretKey } = config.auth;
 

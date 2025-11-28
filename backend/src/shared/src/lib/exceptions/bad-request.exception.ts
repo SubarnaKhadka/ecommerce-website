@@ -1,7 +1,7 @@
-import { HttpException } from "./http.exception";
+import { HttpException } from './http.exception';
 
 export class BadRequestException extends HttpException {
-  public name = "BadRequestException";
+  public name = 'BadRequestException';
 
   /**
    * Instantiates a `BadRequestException` Exception with status code 400.
@@ -12,7 +12,7 @@ export class BadRequestException extends HttpException {
    * @example
    * `throw new BadRequestException()`
    */
-  public constructor(message: string = "Bad Request", errors?: string[]) {
+  public constructor(message: string = 'Bad Request', errors?: string[]) {
     super(400, message, errors);
   }
 }

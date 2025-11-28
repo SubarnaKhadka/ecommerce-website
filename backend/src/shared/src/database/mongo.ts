@@ -1,5 +1,5 @@
-import { MongoClient } from "mongodb";
-import { config } from "../config";
+import { MongoClient } from 'mongodb';
+import { config } from '../config';
 
 const { mongo_uri, mongo_db_name } = config.database;
 
@@ -8,5 +8,5 @@ export const mongoDb = client.db(mongo_db_name);
 
 export async function connectMongo() {
   await client.connect();
-  console.log("Connected to MongoDB");
+  console.log('Connected to MongoDB');
 }

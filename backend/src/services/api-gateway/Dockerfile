@@ -16,7 +16,7 @@ RUN npm install
 
 # Build only this service
 WORKDIR /app/src/services/api-gateway
-RUN npm run build
+RUN npm run ci
 
 EXPOSE 3000
 CMD ["node", "dist/index.js"]

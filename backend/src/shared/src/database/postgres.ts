@@ -1,5 +1,5 @@
-import { Pool } from "pg";
-import { config } from "../config";
+import { Pool } from 'pg';
+import { config } from '../config';
 
 const {
   db_host: host,

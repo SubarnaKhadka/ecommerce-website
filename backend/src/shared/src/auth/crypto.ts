@@ -1,12 +1,12 @@
-import crypto from "crypto";
-import bcrypt from "bcryptjs";
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 export function generateRandomToken(size = 64): string {
-  return crypto.randomBytes(size).toString("base64url");
+  return crypto.randomBytes(size).toString('base64url');
 }
 
 export function hashToken(token: string): string {
-  return crypto.createHash("sha256").update(token).digest("hex");
+  return crypto.createHash('sha256').update(token).digest('hex');
 }
 
 export async function hashPassword(password: string) {

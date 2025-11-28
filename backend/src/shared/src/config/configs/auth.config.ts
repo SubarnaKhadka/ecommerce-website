@@ -1,6 +1,6 @@
-import { registerAs } from "../register-as";
+import { registerAs } from '../register-as';
 
-export const authConfig = registerAs("auth", (env) => ({
+export const authConfig = registerAs('auth', (env) => ({
   issuer: env.JWT_ISSUER,
   accessExp: env.ACCESS_TOKEN_EXP,
   refreshExp: env.REFRESH_TOKEN_EXP,
